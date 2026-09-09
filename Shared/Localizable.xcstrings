@@ -1,0 +1,243 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@" : {
+
+    },
+    "%@ · All times are local to the selected city." : {
+
+    },
+    "%@ – %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ – %2$@"
+          }
+        }
+      }
+    },
+    "%@ • Day" : {
+
+    },
+    "%@ • Night" : {
+
+    },
+    "8 daytime · 8 nighttime periods" : {
+
+    },
+    "A new Vedic day begins at sunrise." : {
+
+    },
+    "Back to today" : {
+
+    },
+    "Change city" : {
+
+    },
+    "Change city (⌘L)" : {
+
+    },
+    "Choghadiya" : {
+
+    },
+    "Choose a city" : {
+
+    },
+    "Choose a city and date. Leave them empty to follow the app’s city and show live timings." : {
+
+    },
+    "Choose date" : {
+
+    },
+    "City" : {
+
+    },
+    "Could not refresh. Showing saved timings until this schedule expires." : {
+
+    },
+    "Current Area" : {
+
+    },
+    "Current location" : {
+
+
+    },
+    "DATE" : {
+
+    },
+    "DAY OVERVIEW" : {
+
+    },
+    "DAY SCHEDULE" : {
+
+    },
+    "Daily schedule" : {
+
+    },
+    "Date" : {
+
+    },
+    "Day" : {
+
+    },
+    "Detecting..." : {
+
+    },
+    "Done" : {
+
+    },
+    "Enable Location" : {
+
+    },
+    "Enable location in System Settings for local timings. Saved timings or Surat may be used while location is unavailable." : {
+
+    },
+    "Explore a day" : {
+
+    },
+    "Finding your timings…" : {
+
+    },
+    "Go to today" : {
+
+    },
+    "HAPPENING NOW" : {
+
+    },
+    "LOCATION" : {
+
+    },
+    "Leave empty for live timings. Select a date for a day overview." : {
+
+    },
+    "Leave empty to follow the city selected in the app." : {
+
+    },
+    "Live timings for the city selected in the app." : {
+
+    },
+    "Local solar time" : {
+
+    },
+    "Location Access Disabled" : {
+
+    },
+    "More" : {
+
+    },
+    "NOW" : {
+
+    },
+    "New cycle at sunrise" : {
+
+    },
+    "Next" : {
+
+    },
+    "Next day" : {
+
+    },
+    "Night" : {
+
+    },
+    "No cities found. Try adding a country or region." : {
+
+    },
+    "Open Settings" : {
+
+    },
+    "Open the app to refresh." : {
+
+    },
+    "POPULAR CITIES" : {
+
+    },
+    "Period" : {
+
+    },
+    "Plan your day" : {
+
+    },
+    "Previous" : {
+
+    },
+    "Previous day" : {
+
+    },
+    "Refresh" : {
+
+    },
+    "Refresh timings (⌘R)" : {
+
+    },
+    "Refresh widgets" : {
+
+    },
+    "Ruled by %@" : {
+
+    },
+    "SEARCH RESULTS" : {
+
+    },
+    "Search" : {
+
+    },
+    "Search city or place" : {
+
+    },
+    "Search is unavailable. Check your connection and try again." : {
+
+    },
+    "Showing saved timings while refreshing." : {
+
+    },
+    "Surat (Default)" : {
+
+    },
+    "Timings follow the city’s local time." : {
+
+    },
+    "Timings unavailable" : {
+
+    },
+    "Today" : {
+
+    },
+    "Today’s timings" : {
+
+    },
+    "Try again" : {
+
+    },
+    "UP NEXT" : {
+
+    },
+    "Unable to load timings. Check your internet connection and try again." : {
+
+    },
+    "Unavailable" : {
+
+    },
+    "Use current location" : {
+
+
+    },
+    "Use your location or choose a city." : {
+
+    },
+    "Your almanac" : {
+
+    },
+    "Your city. Your day. Choose a city and date in Edit Widget." : {
+
+    },
+    "left" : {
+
+    },
+    "remaining" : {
+
+    }
+  },
+  "version" : "1.0"
+}

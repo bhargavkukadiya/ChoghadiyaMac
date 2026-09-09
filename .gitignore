@@ -1,0 +1,57 @@
+# Xcode & Apple Platforms
+## User-specific settings & states
+*.xcuserdatad
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+## Build Products & Intermediates
+[Bb]uild/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Test Results & Diagnostic Logs
+*.xcresult
+*.xcactivitylog
+*.crash
+*.log
+
+## Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+
+# XcodeGen
+# Note: ChoghadiyaMac.xcodeproj is tracked for out-of-the-box cloning.
+# If regenerating on demand via CI/CD, uncomment:
+# *.xcodeproj
+
+# macOS System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Editor & Temporary Files
+*.swp
+*~
+*.bak
+.idea/
+.vscode/
+
+# Local credentials and signing material
+.env
+.env.*
+!.env.example
+*.p12
+*.p8
+*.key
+*.mobileprovision
+*.provisionprofile

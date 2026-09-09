@@ -1,0 +1,100 @@
+name: ChoghadiyaMac
+options:
+  bundleIdPrefix: com.choghadiya
+  deploymentTarget:
+    macOS: "12.0"
+settings:
+  SWIFT_EMIT_LOC_STRINGS: YES
+schemes:
+  ChoghadiyaMacApp:
+    build:
+      targets:
+        ChoghadiyaMacApp: all
+    test:
+      targets:
+        - ChoghadiyaMacTests
+targets:
+  ChoghadiyaMacApp:
+    type: application
+    platform: macOS
+    settings:
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    sources:
+      - App
+      - Shared
+    dependencies:
+      - package: ChoghadiyaKit
+      - package: LocationManager
+      - target: ChoghadiyaWidget
+        embed: true
+    info:
+      path: App/Resources/Info.plist
+      properties:
+        NSLocationWhenInUseUsageDescription: "We need your location to accurately calculate the Choghadiya times for your current area."
+        NSLocationUsageDescription: "We need your location to accurately calculate the Choghadiya times for your current area."
+        CFBundleName: "Choghadiya"
+        CFBundleURLTypes:
+          - CFBundleURLName: com.choghadiya.schedule
+            CFBundleURLSchemes:
+              - choghadiya
+    entitlements:
+      path: App/Resources/App.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.choghadiya.mac
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.personal-information.location: true
+  
+  ChoghadiyaWidget:
+    type: app-extension
+    platform: macOS
+    sources:
+      - Widget
+      - Shared
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.choghadiya.ChoghadiyaMacApp.ChoghadiyaWidget
+    dependencies:
+      - package: ChoghadiyaKit
+      - package: LocationManager
+    info:
+      path: Widget/Resources/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSWidgetWantsLocation: true
+    entitlements:
+      path: Widget/Resources/Widget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.choghadiya.mac
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.personal-information.location: true
+
+  ChoghadiyaMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    settings:
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) TESTING_WIDGET_PROVIDER"
+    sources:
+      - Tests
+      - Widget/Provider
+      - Widget/Services
+      - Widget/Models
+      - Shared/ScheduleStyle.swift
+      - Shared/ScheduleFormatting.swift
+      - Widget/Views/SmallWidgetView.swift
+      - Widget/Views/MediumWidgetView.swift
+    dependencies:
+      - target: ChoghadiyaMacApp
+      - package: ChoghadiyaKit
+      - package: LocationManager
+
+packages:
+  ChoghadiyaKit:
+    url: https://github.com/bhargavkukadiya/ChoghadiyaKit
+    from: 1.0.1
+  LocationManager:
+    url: https://github.com/bhargavkukadiya/LocationManager.git
+    from: 1.0.1

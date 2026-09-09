@@ -1,0 +1,24 @@
+{
+  "originHash" : "50ff6638c9696e3c0a35b72d3d12f620274ba7788761b3b7989c5844708d0ae2",
+  "pins" : [
+    {
+      "identity" : "choghadiyakit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bhargavkukadiya/ChoghadiyaKit",
+      "state" : {
+        "revision" : "6063310282d8e5752ef0ff41321dd6857908238f",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "locationmanager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bhargavkukadiya/LocationManager.git",
+      "state" : {
+        "revision" : "893995f60bfdd2cb094f9b9d22f74606a1a161ae",
+        "version" : "1.0.1"
+      }
+    }
+  ],
+  "version" : 3
+}

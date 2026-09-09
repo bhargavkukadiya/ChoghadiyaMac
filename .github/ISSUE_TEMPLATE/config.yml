@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "💬 Community & Questions"
+    url: https://github.com/bhargavkukadiya/ChoghadiyaMac/discussions
+    about: "Ask questions, share workflows, and discuss Vedic astrology calculations."
+  - name: "📖 Architecture Documentation"
+    url: https://github.com/bhargavkukadiya/ChoghadiyaMac/blob/main/ARCHITECTURE.md
+    about: "Read the technical design and system architecture documentation."
+  - name: "🛡️ Security & Privacy Policy"
+    url: https://github.com/bhargavkukadiya/ChoghadiyaMac/blob/main/SECURITY.md
+    about: "Report sensitive security vulnerabilities responsibly."

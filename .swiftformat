@@ -1,0 +1,7 @@
+# SwiftFormat Configuration for Choghadiya for Mac
+--indent 4
+--exclude build,.build
+--swiftversion 5.9
+--linebreaks lf
+--trimwhitespace always
+--semicolons never
