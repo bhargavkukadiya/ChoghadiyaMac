@@ -40,10 +40,11 @@ We are committed to providing a welcoming, inclusive, and harassment-free enviro
 
 ### Fork & Clone
 1. Fork the repository on GitHub.
-2. Clone your fork locally:
+2. Clone your fork locally and add the upstream remote:
    ```bash
    git clone https://github.com/<your-username>/ChoghadiyaMac.git
    cd ChoghadiyaMac
+   git remote add upstream https://github.com/bhargavkukadiya/ChoghadiyaMac.git
    ```
 3. Create a descriptive feature branch:
    ```bash

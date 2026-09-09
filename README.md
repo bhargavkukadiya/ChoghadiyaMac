@@ -5,11 +5,12 @@
     <strong>Astronomical Vedic Choghadiya Dashboard & WidgetKit Suite for macOS</strong>
   </p>
   <p align="center">
+    <a href="https://github.com/bhargavkukadiya/ChoghadiyaMac/releases/tag/1.0.0"><img src="https://img.shields.io/badge/Release-v1.0.0-5856D6.svg?style=flat-square&logo=github" alt="Release v1.0.0"></a>
     <a href="https://developer.apple.com/macos/"><img src="https://img.shields.io/badge/Platform-macOS%2012.0%2B-007AFF.svg?style=flat-square&logo=apple" alt="macOS 12.0+"></a>
     <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9%20%7C%206.0-F05138.svg?style=flat-square&logo=swift" alt="Swift 5.9 | 6.0"></a>
     <a href="https://github.com/yonaskolb/XcodeGen"><img src="https://img.shields.io/badge/XcodeGen-2.46%2B-orange.svg?style=flat-square" alt="XcodeGen"></a>
     <a href="https://github.com/nicklockwood/SwiftFormat"><img src="https://img.shields.io/badge/Code%20Style-SwiftFormat-blueviolet.svg?style=flat-square" alt="SwiftFormat"></a>
-    <a href="https://github.com/bhargavkukadiya/ChoghadiyaMac/actions/workflows/ci.yml"><img src="https://github.com/bhargavkukadiya/ChoghadiyaMac/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
+    <a href="https://github.com/bhargavkukadiya/ChoghadiyaMac/actions/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-Passing-34C759.svg?style=flat-square&logo=githubactions" alt="CI Status"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="MIT License"></a>
   </p>
 </p>
