@@ -1,0 +1,62 @@
+name: Release - Build & Publish DMG
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag name (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build DMG & Publish Release
+    runs-on: macos-15
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Show Xcode & System Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Determine Release Version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            TAG="${{ github.event.inputs.tag_name }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build & Package DMG
+        run: |
+          ./script/create_dmg.sh "${{ steps.version.outputs.version }}"
+
+      - name: Attach DMG Assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Choghadiya for Mac v${{ steps.version.outputs.version }}
+          files: |
+            build/Artifacts/Choghadiya-*.dmg
+            build/Artifacts/Choghadiya-*.dmg.sha256
+          draft: false
+          prerelease: false
+          generate_release_notes: true

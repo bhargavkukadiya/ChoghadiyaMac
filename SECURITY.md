@@ -6,8 +6,7 @@ We actively maintain and provide security patches for the latest release on curr
 
 | Version | Supported | Minimum OS |
 | :--- | :--- | :--- |
-| **v1.x (Latest)** | ✅ Yes | macOS 12.0 Monterey or later |
-| **< v1.0** | ❌ No | Deprecated |
+| **1.0.x (Latest)** | ✅ Yes | macOS 12.0 Monterey or later |
 
 ---
 

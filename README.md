@@ -298,7 +298,21 @@ xcodebuild -project ChoghadiyaMac.xcodeproj \
            build CODE_SIGNING_ALLOWED=NO
 ```
 
+### Download & Direct Installation
+Download the latest disk image (`Choghadiya-1.0.0.dmg`) from the [GitHub Releases](https://github.com/bhargavkukadiya/ChoghadiyaMac/releases) page. Open the `.dmg` and drag **Choghadiya** to your **Applications** folder.
+
+> [!TIP]
+> **First Launch on macOS (Gatekeeper):**  
+> Because this is a free open-source build without a paid Apple Developer ID certificate, macOS Gatekeeper may display an unidentified developer prompt on first launch. To open it:
+> 1. Right-click (or <kbd>Control</kbd>-click) **Choghadiya.app** in Finder.
+> 2. Click **Open**, then confirm by clicking **Open** in the dialog.
+> 3. Alternatively, run: `xattr -cr /Applications/Choghadiya.app` in Terminal.
+
 ### Helper Scripts
+- **Package Release Disk Image (.dmg):**
+  ```bash
+  ./script/create_dmg.sh             # Builds Release bundle and packages drag-and-drop .dmg
+  ```
 - **Launch Development App:**
   ```bash
   ./script/build_and_run.sh          # Build and open app
