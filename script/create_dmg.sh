@@ -14,7 +14,7 @@ if [ -z "$VERSION" ]; then
     VERSION=$(git describe --tags --exact-match 2>/dev/null || true)
 fi
 if [ -z "$VERSION" ]; then
-    VERSION=$(defaults read "$TASK_ROOT/App/Resources/Info.plist" CFBundleShortVersionString 2>/dev/null || echo "1.0.0")
+    VERSION=$(defaults read "$TASK_ROOT/App/Resources/Info.plist" CFBundleShortVersionString 2>/dev/null || echo "1.0.1")
 fi
 # Strip leading 'v' if present for filename consistency
 VERSION="${VERSION#v}"
