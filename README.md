@@ -364,7 +364,7 @@ xcodebuild test \
 - **macOS App Sandbox:** Both the host application and widget extension enable Apple's App Sandbox.
 - **Zero Tracking:** No analytics libraries, crash reporters, or third-party telemetry frameworks.
 - **Location Transparency:** Device location is requested through CoreLocation with permission. Choosing a city manually avoids device-location access, but its coordinates are still used in network requests. City search and reverse geocoding use Apple services through LocationManager.
-- **Solar API Disclosure:** ChoghadiyaKit sends latitude, longitude, date, and timezone to `api.sunrise-sunset.org` to fetch solar data. The app then computes the schedule and stores it locally for app/widget sharing. New schedules require network access; a valid cached schedule remains usable until it expires.
+- **Solar API Disclosure:** ChoghadiyaKit sends latitude, longitude, date, and timezone to `api.sunrise-sunset.org` to fetch solar data. The app then computes the schedule and stores it locally for app/widget sharing. New schedules require network access; a valid cached schedule remains usable until it expires. The dashboard shows a clickable Sunrise-Sunset.org attribution link beside sunrise and sunset times, as required by the [API attribution terms](https://sunrise-sunset.org/api/v1).
 
 See [SECURITY.md](SECURITY.md) for our comprehensive security and privacy policy.
 

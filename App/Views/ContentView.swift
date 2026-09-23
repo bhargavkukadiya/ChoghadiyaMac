@@ -225,6 +225,9 @@ struct ContentView: View {
                     Label(viewModel.sunriseTimeFormatted, systemImage: "sunrise")
                     Label(viewModel.sunsetTimeFormatted, systemImage: "sunset")
                     Spacer()
+                    Link("Solar data by Sunrise-Sunset.org", destination: URL(string: "https://sunrise-sunset.org")!)
+                        .font(.caption)
+                        .foregroundStyle(.teal)
                 }
                 .font(.callout)
                 .foregroundStyle(.secondary)
