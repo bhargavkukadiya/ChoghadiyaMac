@@ -32,7 +32,7 @@ We take the security and privacy of **Choghadiya for Mac** users seriously. If y
 - **Zero Analytics & Zero Telemetry:** The app contains zero tracking libraries, telemetry SDKs, crash reporters, advertising frameworks, or user analytics.
 - **Location Privacy:**
   - Device coordinates are requested through Apple's `CoreLocation` framework after location permission is granted.
-  - Geographical coordinates and reverse geocoded city names are stored locally in the secure App Group container (`group.com.choghadiya.mac`) solely for calculating local solar times and populating widget timelines.
+  - Geographical coordinates and reverse geocoded city names are stored locally in the shared App Group container (`group.com.choghadiya.mac`) for calculating local solar times and populating widget timelines.
   - Users may opt out of device location by using manual city search. The selected city’s coordinates are still sent to the solar API.
 - **Network Disclosure:**
   - ChoghadiyaKit sends latitude, longitude, the requested date, and timezone to `https://api.sunrise-sunset.org/json` to retrieve sunrise/sunset times. These may be device coordinates or those of a manually selected city. The `com.apple.security.network.client` entitlement permits outbound connections; it does not restrict requests to a particular hostname.

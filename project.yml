@@ -15,6 +15,20 @@ schemes:
     test:
       targets:
         - ChoghadiyaMacTests
+  ChoghadiyaWidget:
+    build:
+      targets:
+        ChoghadiyaWidget: all
+        ChoghadiyaMacApp: all
+    run:
+      executable: ChoghadiyaMacApp
+      launchAutomaticallySubstyle: "2"
+      environmentVariables:
+        _XCWidgetKind: ""
+        _XCWidgetDefaultView: timeline
+        _XCWidgetFamily: systemMedium
+    management:
+      shared: true
 targets:
   ChoghadiyaMacApp:
     type: application

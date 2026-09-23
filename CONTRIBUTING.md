@@ -55,7 +55,7 @@ We are committed to providing a welcoming, inclusive, and harassment-free enviro
 
 ## Project Configuration with XcodeGen
 
-`project.yml` is the **single source of truth** for project structure, build settings, target dependencies, entitlements, and schemes.
+`project.yml` is the source of truth for generated project structure, build settings, target dependencies, entitlements, and the `ChoghadiyaMacApp` and `ChoghadiyaWidget` shared schemes. Shared schemes under `ChoghadiyaMac.xcodeproj/xcshareddata/xcschemes/` are generated from this file and should be kept with the project.
 
 - **Do not manually edit `ChoghadiyaMac.xcodeproj`**.
 - Whenever you add, delete, or move files, or update build settings, modify `project.yml` and regenerate the project:
@@ -112,6 +112,7 @@ Every bug fix or feature must include automated test coverage:
 - **Run the Test Suite:**
   ```bash
   xcodebuild test \
+             -project ChoghadiyaMac.xcodeproj \
              -scheme ChoghadiyaMacApp \
              -destination 'platform=macOS' \
              CODE_SIGN_IDENTITY="" \
@@ -119,7 +120,7 @@ Every bug fix or feature must include automated test coverage:
              CODE_SIGN_ENTITLEMENTS="" \
              CODE_SIGNING_ALLOWED=NO
   ```
-- **Passing Standard:** All 38+ unit and integration tests must pass with 0 failures before opening a pull request.
+- **Passing Standard:** All 38 unit and integration tests must pass with 0 failures before opening a pull request.
 
 ---
 

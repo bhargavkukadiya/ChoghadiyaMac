@@ -26,9 +26,9 @@ This document provides a comprehensive technical blueprint of **Choghadiya for M
 
 1. **Astronomical Fidelity:** Solar timings are non-linear; time divisions are strictly derived from true astronomical local sunrise and sunset calculations rather than fixed clock approximations.
 2. **Concurrency & `@MainActor` Boundaries:** UI state management is isolated to the main actor. Location, network, and solar operations use asynchronous APIs; the app targets currently compile in Swift 5 language mode.
-3. **Race Condition Immunity:** Rapid user interactions (e.g. fast date switching, city changes, permission toggling) cancel obsolete in-flight tasks using cancellation tokens and monotonic request identifiers.
+3. **Race Condition Handling:** Rapid user interactions cancel obsolete in-flight tasks and use unique request identifiers to prevent older results from replacing newer state.
 4. **App Group IPC Resilience:** Synchronization between the host app and the widget extension relies on a dual-layer persistence strategy (`UserDefaults` with App Group suite + fallback JSON file in the shared container).
-5. **Deterministic Testability:** The architecture avoids global singletons and untestable system singletons by injecting time (`TestClock`), location (`LocationManaging`), solar calculations (`SunTimesFetching`), and storage (`ScheduleStore`).
+5. **Deterministic Testability:** Tests inject time (`TestClock`), location (`LocationManaging`), solar calculations (`SunTimesFetching`), and storage (`ScheduleStoring`) to avoid relying on live system services.
 
 ---
 
@@ -36,13 +36,13 @@ This document provides a comprehensive technical blueprint of **Choghadiya for M
 
 ```mermaid
 graph TB
-    subgraph Host Application [ChoghadiyaMacApp Target]
+    subgraph HostApp["Host Application (ChoghadiyaMacApp Target)"]
         AppUI["SwiftUI Views<br/>(ContentView, ActiveSlotHeroCard, SlotRowView, CityPickerSheet)"]
         CVM["ContentViewModel<br/>(@MainActor ObservableObject State Machine)"]
         ALS["AppLocationService<br/>(LocationManaging Protocol Conformance)"]
     end
 
-    subgraph Widget Extension [ChoghadiyaWidget Target]
+    subgraph WidgetExtension["Widget Extension (ChoghadiyaWidget Target)"]
         WEntry["ChoghadiyaWidgetEntryView<br/>(Responsive Size Router)"]
         WViews["Widget Views<br/>(SmallWidgetView, MediumWidgetView)"]
         WTP["ChoghadiyaTimelineProvider<br/>(Timeline & Snapshot Generator)"]
@@ -50,7 +50,7 @@ graph TB
         WLF["WidgetLocationFetcher<br/>(Async Location Coordinator)"]
     end
 
-    subgraph Shared Core Layer [Shared/]
+    subgraph SharedCore["Shared Core Layer (Shared/)"]
         SSS["SharedScheduleStore<br/>(Dual-layer App Group Persistence)"]
         CitySearch["CitySearch<br/>(Forward Geocoding & Suggestions)"]
         Formatting["ScheduleFormatting<br/>(Timezone-aware Date/Time Formatters)"]
@@ -58,12 +58,12 @@ graph TB
         Style["ScheduleStyle<br/>(Vedic Color Gradients & Auspiciousness Tokens)"]
     end
 
-    subgraph External Dependencies [Swift Package Manager]
+    subgraph Dependencies["External Dependencies (Swift Package Manager)"]
         CK["ChoghadiyaKit (v1.0.2)<br/>(Astronomical Solar & Panchang Scheduler)"]
         LM["LocationManager (v1.0.1)<br/>(Modern CoreLocation Async Wrapper)"]
     end
 
-    subgraph macOS Subsystems [Apple Frameworks]
+    subgraph MacOSSubsystems["macOS Subsystems (Apple Frameworks)"]
         CoreLoc["CoreLocation Framework"]
         WidgetDaemon["WidgetKit Daemon / Chronod"]
         AppGroupFS["App Group Container<br/>(group.com.choghadiya.mac)"]
@@ -99,7 +99,7 @@ graph TB
 
 ## End-to-End Data Flow Sequence
 
-The diagram below illustrates the reactive flow from app initialization through location resolution, solar data fetching, schedule partitioning, state publication, and widget synchronization:
+The diagram below shows live schedule loading, location selection, solar-data retrieval, and widget synchronization:
 
 ```mermaid
 sequenceDiagram
@@ -113,25 +113,29 @@ sequenceDiagram
     participant Widget as ChoghadiyaWidget
 
     User->>App: Launch App or Change Date/City
-    App->>VM: loadLiveSchedule() or selectDate(newDate)
+    App->>VM: onAppear(), selectDate(date), or selectCity(city)
     VM->>VM: Transition state to .loading
-    VM->>Loc: requestAuthorization() & resolveLocation()
 
-    alt Location Available
+    alt Device location selected and authorized
+        VM->>Loc: fetchCurrentLocation() and reverseGeocodeCityAndTimeZone()
         Loc-->>VM: Coordinates (Lat, Long, TimeZone)
-    else Location Denied / Unavailable
-        Loc-->>VM: Fallback Location (Surat, 21.17°N, 72.83°E)
+    else Manual city selected
+        VM->>VM: Use selected city coordinates and timezone
+    else Location unavailable or not authorized
+        VM->>VM: Use cached schedule when eligible, otherwise Surat fallback
     end
 
-    VM->>Engine: fetchSchedule(location, date)
-    Engine->>Engine: Fetch astronomical sunrise/sunset via Solar API
+    VM->>Engine: getSchedule(location, date)
+    Engine->>Engine: Fetch sunrise and sunset via Sunrise-Sunset API
     Engine->>Engine: Partition 16 Vedic diurnal/nocturnal Choghadiya slots
     Engine-->>VM: ChoghadiyaSchedule object
 
     VM->>VM: Compute active slot & transition state to .loaded
-    VM->>Store: save(schedule, location, cityName)
-    Store->>Store: Write to UserDefaults(suite:) & shared JSON file
-    VM->>Widget: WidgetCenter.shared.reloadAllTimelines()
+    opt Live schedule loaded successfully
+        VM->>Store: save(schedule, location, cityName)
+        Store->>Store: Write to App Group UserDefaults and shared JSON file
+        VM->>Widget: WidgetCenter.shared.reloadAllTimelines()
+    end
     VM-->>App: Publish updated schedule, slots, and active countdown
     App-->>User: Render ActiveSlotHeroCard & SlotRowViews
 
@@ -151,23 +155,23 @@ sequenceDiagram
 - **`ContentViewModel`**: Isolated to `@MainActor`. Serves as the central state machine for the application:
   - Manages `state`: `.idle`, `.loading`, `.loaded`, and `.failed(message: String)`.
   - Manages `selectedDate`, `selectedTab` (Day vs Night), and `selectedCity`.
-  - Runs a 1-second interval timer driving `now()` and updating the active Choghadiya countdown without triggering full view re-renders.
+  - Runs a 1-second interval timer to update the active Choghadiya slot and countdown.
   - Controls task lifecycle through `scheduleTask` and `permissionTask`, ensuring obsolete asynchronous work is explicitly cancelled when the user changes dates or selects a city.
 - **SwiftUI Views**:
   - `ContentView`: Declarative navigation structure with sidebar, date navigation, toolbar actions, and responsive layout.
-  - `ActiveSlotHeroCard`: Card view presenting the currently active Choghadiya period with dynamic planetary gradients and live countdown.
+  - `ActiveSlotHeroCard`: Card view presenting the currently active Choghadiya period, ruling planet, auspiciousness, and live countdown over a fixed gradient.
   - `SlotRowView`: Modular row component rendering individual time ranges, auspiciousness tier, and planetary rulers.
   - `CityPickerSheet`: Interactive modal sheet integrating `CitySearch` for global city lookups and manual city selection.
   - `LocationBannerView`: Privacy-aware banner prompting the user to grant location permissions or open macOS System Settings.
 
 ### 2. Services & Abstraction Layer
-- **`LocationManaging` Protocol:** Decouples CoreLocation from the view models, defining essential properties (`authorizationStatus`, `currentLocation`) and async methods (`requestWhenInUseAuthorizationAsync()`, `requestLocation()`).
+- **`LocationManaging` Protocol:** Decouples CoreLocation from the view model with `isAuthorized`, `authorizationStatus`, and `currentLocation` properties plus async methods for permission requests, location fixes, and reverse geocoding.
 - **`AppLocationService`:** Production adapter conforming to `LocationManaging`, delegating to the `LocationManager` SPM package.
 - **`ForwardGeocoding` Protocol:** Abstraction layer on top of `CLGeocoder`, allowing unit tests to inject deterministic search results for global city lookups.
 
 ### 3. Astronomical Calculation Engine
 - **`ChoghadiyaKit`:** An external, modular Swift package responsible for:
-  - Querying astronomical solar parameters (solar noon, sunrise, sunset, dawn, dusk) for any geographic coordinates.
+  - Fetching sunrise, sunset, and the following sunrise for geographic coordinates and a timezone through the Sunrise-Sunset API.
   - Dividing the day into 8 diurnal slots (sunrise to sunset) and 8 nocturnal slots (sunset to subsequent sunrise).
   - Calculating ruling *Grahas* based on the day of the week (*Vāra*) and slot position.
   - Resolving the active slot for any given timestamp.
@@ -175,15 +179,14 @@ sequenceDiagram
 ### 4. Shared Storage & IPC Layer
 - **`SharedScheduleStore`:** Shared persistence engine between the main macOS app and the WidgetKit extension using App Group `group.com.choghadiya.mac`.
 - **Dual-Layer Strategy:**
-  1. Primary: `UserDefaults(suiteName: "group.com.choghadiya.mac")` for fast in-memory IPC reads and atomic key-value synchronization.
-  2. Secondary: `shared_schedule.json` written directly to the shared App Group filesystem container as a persistent fallback.
+  1. Primary: `UserDefaults(suiteName: "group.com.choghadiya.mac")` for the shared encoded schedule payload.
+  2. Fallback: `shared_schedule.json` written atomically to the shared App Group filesystem container. Reads try UserDefaults first, then the file.
 - **Cache Validation & Expiration:** The store returns decoded payloads without checking expiration. App and widget consumers check that a schedule has a current slot before presenting it as live.
 
 ### 5. WidgetKit Extension Architecture
 - **`ChoghadiyaTimelineProvider`:** Generates `Timeline` entries for widget rendering:
   - Generates timeline entries corresponding precisely to slot transition boundaries.
-  - Emits an `.after(nextSunrise)` reload policy to guarantee the widget refreshes when the solar cycle resets.
-  - Includes an unavailable fallback entry at the final boundary to avoid displaying stale countdowns if network refresh is delayed.
+  - Requests a reload at the schedule's final boundary (the next sunrise). Because WidgetKit may delay reloads, the timeline includes an unavailable entry at that boundary to avoid a stale countdown.
 - **`ScheduleWidgetIntent` (macOS 14+):** Configurable AppIntent enabling users to customize the target City and Date per widget instance.
 - **`ChoghadiyaWidgetEntryView`:** Responsive router delegating to `SmallWidgetView` (`.systemSmall`) or `MediumWidgetView` (`.systemMedium`).
 
@@ -191,7 +194,7 @@ sequenceDiagram
 
 ## Concurrency & Thread Safety
 
-The app uses Swift concurrency APIs and actor isolation. Its Xcode targets currently use Swift 5 language mode (`SWIFT_VERSION = 5.0`); this does not enable Swift 6 language-mode checking.
+The app uses Swift concurrency APIs and actor isolation. Its Xcode targets currently use Swift 5 language mode (`SWIFT_VERSION = 5.0`), so Swift 6 language-mode checking is not enabled.
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -200,13 +203,13 @@ The app uses Swift concurrency APIs and actor isolation. Its Xcode targets curre
 │  - SwiftUI View Hierarchy                              │
 │  - CityPickerSheet Search Presentation                 │
 └──────────────────────────┬─────────────────────────────┘
-                           │ async / await (cooperative)
+                           │ async / await
                            ▼
 ┌────────────────────────────────────────────────────────┐
-│           Cooperative Background Tasks                 │
-│  - Solar Data Retrieval (APISunTimesFetcher)           │
-│  - Geocoding & Reverse Geocoding (CLGeocoder)          │
-│  - App Group File Serialization (SharedScheduleStore)  │
+│     Asynchronous Services and Shared Persistence       │
+│  - Solar requests via ChoghadiyaKit                    │
+│  - Geocoding via LocationManager / Apple services      │
+│  - App Group reads and writes via SharedScheduleStore │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -215,12 +218,13 @@ The app uses Swift concurrency APIs and actor isolation. Its Xcode targets curre
    ```swift
    // Cancels any in-flight schedule fetch before initiating a new one
    scheduleTask?.cancel()
-   scheduleTask = Task { @MainActor [weak self] in
-       guard let self, !Task.isCancelled else { return }
-       // ... fetch and publish
+   let id = UUID()
+   requestID = id
+   scheduleTask = Task {
+       // Fetch, check cancellation, and publish only if requestID still matches id.
    }
    ```
-2. **Debounced City Search:** Search queries in `CityPickerSheet` cancel previous geocoding queries upon text change, preventing out-of-order search results.
+2. **Cancelled City Searches:** Editing the query cancels the active geocoding task. Searches run when the user submits the query or presses Search.
 3. **Explicit Deinitialization:** `ContentViewModel.deinit` cancels `scheduleTask`, `permissionTask`, and unsubscribes Combine timer cancellables.
 
 ---
@@ -275,9 +279,9 @@ The test suite (`ChoghadiyaMacTests`) achieves high reliability by avoiding real
 | Test Double | Role | Injected Into |
 | :--- | :--- | :--- |
 | `TestClock` | Provides deterministic `now()` timestamps; supports manual time advancement across midnight and sunrise. | `ContentViewModel`, `ChoghadiyaTimelineProvider` |
-| `MockLocationManager` | Simulates `.authorizedWhenInUse`, `.denied`, `.restricted`, and location errors. | `ContentViewModel`, `WidgetLocationFetcher` |
-| `MockSunTimesFetcher` | Returns pre-computed solar sunrise/sunset timestamps without network calls. | `ChoghadiyaKit` |
-| `MemoryScheduleStore` | In-memory implementation of `ScheduleStore` isolating tests from disk and production App Groups. | `ContentViewModel`, `TimelineProvider` |
+| `MockLocationManager` | Simulates authorization states and location errors. | `ContentViewModel` |
+| `StubSunTimesFetcher` | Returns pre-computed solar sunrise/sunset timestamps without network calls. | `ChoghadiyaKit` |
+| `MemoryScheduleStore` | In-memory implementation of `ScheduleStoring`, isolating tests from disk and production App Groups. | `ContentViewModel`, `ChoghadiyaTimelineProvider` |
 
 ### Automated Test Suites:
 - **`ScheduleRegressionTests` (15 tests):** Tests pre-sunrise rollover, rapid date changes, fallback stability, and offline startup.

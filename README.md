@@ -7,10 +7,10 @@
   <p align="center">
     <a href="https://github.com/bhargavkukadiya/ChoghadiyaMac/releases/tag/1.0.0"><img src="https://img.shields.io/badge/Release-v1.0.0-5856D6.svg?style=flat-square&logo=github" alt="Release v1.0.0"></a>
     <a href="https://developer.apple.com/macos/"><img src="https://img.shields.io/badge/Platform-macOS%2012.0%2B-007AFF.svg?style=flat-square&logo=apple" alt="macOS 12.0+"></a>
-    <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9%20%7C%206.0-F05138.svg?style=flat-square&logo=swift" alt="Swift 5.9 | 6.0"></a>
+    <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5%20language%20mode-F05138.svg?style=flat-square&logo=swift" alt="Swift 5 language mode"></a>
     <a href="https://github.com/yonaskolb/XcodeGen"><img src="https://img.shields.io/badge/XcodeGen-2.46%2B-orange.svg?style=flat-square" alt="XcodeGen"></a>
     <a href="https://github.com/nicklockwood/SwiftFormat"><img src="https://img.shields.io/badge/Code%20Style-SwiftFormat-blueviolet.svg?style=flat-square" alt="SwiftFormat"></a>
-    <a href="https://github.com/bhargavkukadiya/ChoghadiyaMac/actions/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-Passing-34C759.svg?style=flat-square&logo=githubactions" alt="CI Status"></a>
+    <a href="https://github.com/bhargavkukadiya/ChoghadiyaMac/actions/workflows/ci.yml"><img src="https://github.com/bhargavkukadiya/ChoghadiyaMac/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI Status"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="MIT License"></a>
   </p>
 </p>
@@ -53,7 +53,7 @@ Built from the ground up with **SwiftUI**, **Swift Concurrency**, **WidgetKit**,
 ## Key Features
 
 - ☀️ **Astronomical Solar Precision:** Computes exact daily divisions based on precise geographical coordinates and astronomical sunrise/sunset calculations rather than arbitrary clock approximations.
-- ⏱️ **Live Countdown & Active Hero Card:** Real-time second-by-second countdown with visual pulse indicator and qualitative color gradients matching the active planetary period.
+- ⏱️ **Live Countdown & Active Hero Card:** Real-time second-by-second countdown with the active slot's ruling planet and auspiciousness.
 - 🪐 **Planetary Graha Rulers:** Full visibility into ruling celestial deities (*Surya, Chandra, Mangal, Budha, Guru, Shukra, Shani*) and qualitative auspiciousness classifications.
 - 🌓 **Diurnal & Nocturnal Views:** One-click segmented selector to switch between Day (8 periods) and Night (8 periods) schedules.
 - 🖥️ **Desktop & Notification Center Widgets:**
@@ -63,7 +63,7 @@ Built from the ground up with **SwiftUI**, **Swift Concurrency**, **WidgetKit**,
   - **Seamless Deep Linking:** Clicking any widget instantly opens the host app focused on that specific city and date.
 - 🔍 **Worldwide City Search & Timezones:** Full forward geocoding integration allowing instant lookups of any global city with localized civil day and timezone preservation.
 - 🛡️ **Offline Resilience & Shared Storage:** High-performance App Group (`group.com.choghadiya.mac`) caching layer that keeps recent schedules visible offline until solar expiration.
-- ⌨️ **Native macOS HIG Polish:** Full support for Dark & Light appearances, vibrancy materials, customizable sidebar, and comprehensive keyboard shortcuts.
+- ⌨️ **Native macOS HIG Polish:** Support for Dark & Light appearances, vibrancy materials, and keyboard shortcuts.
 - 🔒 **Sandboxed, with no analytics:** Schedules are stored locally. Solar-data requests send the selected location’s coordinates, date, and timezone to the Sunrise-Sunset API; city search and reverse geocoding use Apple services.
 
 ---
@@ -131,19 +131,19 @@ Designed to feel immediately at home on macOS:
 
 ```mermaid
 graph TD
-    subgraph Host Application [ChoghadiyaMacApp]
+    subgraph HostApp["Host Application (ChoghadiyaMacApp)"]
         AppUI[SwiftUI Views & Navigation]
         CVM[ContentViewModel - MainActor State Machine]
         ALS[AppLocationService - Adapter]
     end
 
-    subgraph Widget Extension [ChoghadiyaWidget]
+    subgraph WidgetExtension["Widget Extension (ChoghadiyaWidget)"]
         WEntry[Widget Entry View & Router]
         WTP[ChoghadiyaTimelineProvider]
         WLF[WidgetLocationFetcher]
     end
 
-    subgraph Shared Core Framework [Shared/]
+    subgraph SharedCore["Shared Core (Shared/)"]
         SSS[(SharedScheduleStore - App Group IPC)]
         SF[ScheduleFormatting]
         SS[ScheduleStyle]
@@ -152,7 +152,7 @@ graph TD
         Strings[Localizable.xcstrings]
     end
 
-    subgraph External Dependencies [Swift Package Manager]
+    subgraph Dependencies["External Dependencies (Swift Package Manager)"]
         CK[ChoghadiyaKit - Solar Engine]
         LM[LocationManager - CoreLocation Wrapper]
     end
@@ -173,7 +173,7 @@ graph TD
     SL -.->|choghadiya:// URL Scheme| AppUI
 ```
 
-- **Core Technologies:** SwiftUI, Swift 5.9 / 6.0 Concurrency (`async`/`await`, `@MainActor`, `TaskCancellation`), WidgetKit, Combine, App Group IPC.
+- **Core Technologies:** SwiftUI, Swift Concurrency (`async`/`await`, `@MainActor`, task cancellation; Swift 5 language mode), WidgetKit, Combine, and App Group IPC.
 - **External Packages:**
   - [ChoghadiyaKit](https://github.com/bhargavkukadiya/ChoghadiyaKit) (`v1.0.2`): Deterministic astronomical solar calculator and Panchang schedule builder.
   - [LocationManager](https://github.com/bhargavkukadiya/LocationManager) (`v1.0.1`): Production CoreLocation manager with native async/await, reverse geocoding, and stream safety.
@@ -193,6 +193,7 @@ ChoghadiyaMac/
 ├── CONTRIBUTING.md                           # Contributor guidelines & standards
 ├── SECURITY.md                               # Security policy & privacy disclosure
 ├── LICENSE                                   # MIT open-source license
+├── .github/                                   # CI/release workflows and issue templates
 │
 ├── App/                                      # Host macOS Application Target
 │   ├── AppEntry/
@@ -245,7 +246,7 @@ ChoghadiyaMac/
 │       ├── Widget.entitlements               # Extension sandbox entitlements
 │       └── Info.plist                        # Extension point declaration
 │
-├── Tests/                                    # Automated Test Suite (38+ tests)
+├── Tests/                                    # Automated Test Suite (38 tests)
 │   ├── Mocks/
 │   │   ├── MockLocationManager.swift         # Mock location double
 │   │   └── ScheduleFixtures.swift            # Deterministic solar fixtures & TestClock
@@ -253,7 +254,7 @@ ChoghadiyaMac/
 │   │   ├── ContentViewModelTests.swift       # State machine & interaction unit tests
 │   │   └── ScheduleRegressionTests.swift     # Concurrency, date & cache regression tests
 │   └── Integration/
-│       ├── ChoghadiyaKitIntegrationTests.swift# Astronomical engine verification
+│       ├── ChoghadiyaKitIntegrationTests.swift # Schedule and Kit integration checks
 │       ├── ScheduleFormattingTests.swift      # Timezone & civil day tests
 │       ├── ScheduleLinkTests.swift            # Deep link round-trip serialization tests
 │       ├── WidgetTimelineTests.swift          # Expiration & fallback timeline tests
@@ -265,6 +266,7 @@ ChoghadiyaMac/
 └── script/                                   # Developer & CI Automation Scripts
     ├── build_and_run.sh                      # Build & launch unsigned debug binary
     ├── generate_app_icons.sh                 # Sips-based 10-size app icon generator
+    ├── create_dmg.sh                         # Release DMG and SHA-256 sidecar generator
     └── install_and_reset.sh                  # Clean build, register & reset utility
 ```
 
@@ -298,7 +300,7 @@ xcodebuild -project ChoghadiyaMac.xcodeproj \
 ```
 
 ### Download & Direct Installation
-Download the latest disk image (`Choghadiya-1.0.0.dmg`) from the [GitHub Releases](https://github.com/bhargavkukadiya/ChoghadiyaMac/releases) page. Open the `.dmg` and drag **Choghadiya** to your **Applications** folder.
+Download the latest disk image from the [GitHub Releases](https://github.com/bhargavkukadiya/ChoghadiyaMac/releases/latest) page. Open the `.dmg` and drag **Choghadiya** to your **Applications** folder.
 
 > [!TIP]
 > **First Launch on macOS (Gatekeeper):**  
@@ -317,6 +319,8 @@ Download the latest disk image (`Choghadiya-1.0.0.dmg`) from the [GitHub Release
   ./script/build_and_run.sh          # Build and open app
   ./script/build_and_run.sh --debug  # Launch with LLDB attached
   ./script/build_and_run.sh --logs   # Stream unified system logs
+  ./script/build_and_run.sh --telemetry # Stream application log events
+  ./script/build_and_run.sh --verify  # Check that the app launched
   ```
 - **Regenerate App Icons:**
   ```bash
@@ -335,6 +339,7 @@ The codebase includes an extensive automated test suite covering view model stat
 
 ```bash
 xcodebuild test \
+           -project ChoghadiyaMac.xcodeproj \
            -scheme ChoghadiyaMacApp \
            -destination 'platform=macOS' \
            CODE_SIGN_IDENTITY="" \
@@ -356,7 +361,7 @@ xcodebuild test \
 
 ## App Sandbox & Privacy Guarantee
 
-- **Strict macOS Sandbox:** Both the host application and widget extension operate under full Apple sandbox policies.
+- **macOS App Sandbox:** Both the host application and widget extension enable Apple's App Sandbox.
 - **Zero Tracking:** No analytics libraries, crash reporters, or third-party telemetry frameworks.
 - **Location Transparency:** Device location is requested through CoreLocation with permission. Choosing a city manually avoids device-location access, but its coordinates are still used in network requests. City search and reverse geocoding use Apple services through LocationManager.
 - **Solar API Disclosure:** ChoghadiyaKit sends latitude, longitude, date, and timezone to `api.sunrise-sunset.org` to fetch solar data. The app then computes the schedule and stores it locally for app/widget sharing. New schedules require network access; a valid cached schedule remains usable until it expires.
