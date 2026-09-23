@@ -100,21 +100,21 @@ echo "=== 5. Resetting WidgetKit / NotificationCenter subsystems ==="
 killall -9 chronod 2>/dev/null || true
 killall -9 NotificationCenter 2>/dev/null || true
 
-echo "=== 7. Installing app to $DEST_PATH ==="
+echo "=== 6. Installing app to $DEST_PATH ==="
 cp -R "$BUILT_APP" "$DEST_PATH"
 
 WIDGET_PATH="$DEST_PATH/Contents/PlugIns/ChoghadiyaWidget.appex"
 
-echo "=== 9. Registering with LaunchServices and PlugInKit ==="
+echo "=== 7. Registering with LaunchServices and PlugInKit ==="
 /System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister -f -R -trusted "$DEST_PATH"
 pluginkit -a "$WIDGET_PATH"
 pluginkit -e use -i "$WIDGET_BUNDLE_ID"
 
-echo "=== 10. Restarting widget daemon to reload new widget ==="
+echo "=== 8. Restarting widget daemon to reload new widget ==="
 killall -9 chronod 2>/dev/null || true
 killall -9 NotificationCenter 2>/dev/null || true
 
-echo "=== 11. Launching installed app ==="
+echo "=== 9. Launching installed app ==="
 /usr/bin/open "$DEST_PATH"
 
 echo "=== App installation and widget reset completed successfully! ==="

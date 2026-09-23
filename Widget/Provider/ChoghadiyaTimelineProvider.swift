@@ -91,38 +91,7 @@ struct ChoghadiyaTimelineProvider: TimelineProvider {
             return buildTimeline(from: payload.schedule, city: payload.cityName, location: payload.location)
         }
         if chosen != nil || selectedDate != nil {
-            let location = chosen ?? store.load()?.location ?? ScheduleLocation.suggestions[0]
-            var calendar = Calendar(identifier: .gregorian)
-            let components = calendar.dateComponents([.year, .month, .day], from: selectedDate ?? now)
-            calendar.timeZone = location.timeZone
-            let targetDate = selectedDate == nil ? nil : calendar.date(from: components)
-            do {
-                var date = targetDate ?? now
-                var schedule = try await manager.getSchedule(latitude: location.latitude, longitude: location.longitude,
-                                                             timeZone: location.timeZone, date: date)
-                if selectedDate == nil, let sunrise = schedule.daySlots.first?.startTime, now < sunrise {
-                    guard let previousDate = calendar.date(byAdding: .day, value: -1, to: date) else {
-                        let entry = SimpleEntry(date: now, slot: schedule.daySlots.first, city: location.cityName,
-                                                schedule: schedule, location: location)
-                        return Timeline(entries: [entry], policy: .after(now.addingTimeInterval(3600)))
-                    }
-                    date = previousDate
-                    schedule = try await manager.getSchedule(latitude: location.latitude, longitude: location.longitude,
-                                                             timeZone: location.timeZone, date: date)
-                }
-                if selectedDate != nil {
-                    let entry = SimpleEntry(date: now, slot: schedule.daySlots.first, city: location.cityName,
-                                            schedule: schedule, selectedDate: date, location: location)
-                    return Timeline(entries: [entry], policy: .after(now.addingTimeInterval(6 * 3600)))
-                }
-                if city == nil {
-                    store.save(schedule: schedule, cityName: location.cityName, location: location)
-                }
-                return buildTimeline(from: schedule, city: location.cityName, location: location)
-            } catch {
-                return Timeline(entries: [SimpleEntry(date: now, slot: nil, city: location.cityName, selectedDate: targetDate, location: location)],
-                                policy: .after(now.addingTimeInterval(300)))
-            }
+            return await timelineForExplicitCityOrDate(chosen: chosen, selectedDate: selectedDate, city: city)
         }
         let (schedule, cityName, location) = await loadScheduleWithFallback()
         if let schedule {
@@ -131,12 +100,45 @@ struct ChoghadiyaTimelineProvider: TimelineProvider {
         return buildTimeline(from: schedule, city: cityName, location: location)
     }
 
+    private func timelineForExplicitCityOrDate(
+        chosen: ScheduleLocation?,
+        selectedDate: Date?,
+        city: ScheduleLocation?
+    ) async -> Timeline<SimpleEntry> {
+        let now = now()
+        let location = chosen ?? store.load()?.location ?? ScheduleLocation.suggestions[0]
+        var calendar = Calendar(identifier: .gregorian)
+        let components = calendar.dateComponents([.year, .month, .day], from: selectedDate ?? now)
+        calendar.timeZone = location.timeZone
+        let targetDate = selectedDate == nil ? nil : calendar.date(from: components)
+        do {
+            let date = targetDate ?? now
+            var schedule = try await manager.getSchedule(latitude: location.latitude, longitude: location.longitude,
+                                                         timeZone: location.timeZone, date: date)
+            if selectedDate == nil {
+                schedule = try await adjustForPreSunrise(schedule, latitude: location.latitude,
+                                                        longitude: location.longitude, timeZone: location.timeZone)
+            }
+            if selectedDate != nil {
+                let entry = SimpleEntry(date: now, slot: schedule.daySlots.first, city: location.cityName,
+                                        schedule: schedule, selectedDate: date, location: location)
+                return Timeline(entries: [entry], policy: .after(now.addingTimeInterval(6 * 3600)))
+            }
+            if city == nil {
+                store.save(schedule: schedule, cityName: location.cityName, location: location)
+            }
+            return buildTimeline(from: schedule, city: location.cityName, location: location)
+        } catch {
+            return Timeline(entries: [SimpleEntry(date: now, slot: nil, city: location.cityName, selectedDate: targetDate, location: location)],
+                            policy: .after(now.addingTimeInterval(300)))
+        }
+    }
+
     // MARK: - Private Schedule Loading
 
     private func loadScheduleWithFallback() async -> (ChoghadiyaSchedule?, String, ScheduleLocation?) {
         let now = now()
         do {
-            // Attempt location fetch with a 3.5s timeout
             let location = try await locationFetcher.fetchLocation(timeout: 3.5)
             let (city, locationTimeZone) = await locationFetcher.reverseGeocodeCityAndTimeZone(for: location)
             let initialSchedule = try await manager.getSchedule(
@@ -144,25 +146,12 @@ struct ChoghadiyaTimelineProvider: TimelineProvider {
                 timeZone: locationTimeZone,
                 date: now
             )
-
-            // In Vedic astrology, pre-sunrise hours belong to the previous calendar day's cycle
-            let schedule: ChoghadiyaSchedule
-            if let sunrise = initialSchedule.daySlots.first?.startTime, now < sunrise {
-                var cal = Calendar(identifier: .gregorian)
-                cal.timeZone = locationTimeZone
-                if let prevDay = cal.date(byAdding: .day, value: -1, to: now) {
-                    schedule = try await manager.getSchedule(
-                        coordinate: location.coordinate,
-                        timeZone: locationTimeZone,
-                        date: prevDay
-                    )
-                } else {
-                    schedule = initialSchedule
-                }
-            } else {
-                schedule = initialSchedule
-            }
-
+            let schedule = try await adjustForPreSunrise(
+                initialSchedule,
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude,
+                timeZone: locationTimeZone
+            )
             return (schedule, city, ScheduleLocation(latitude: location.coordinate.latitude,
                                                      longitude: location.coordinate.longitude, timeZone: locationTimeZone, cityName: city))
         } catch {
@@ -174,25 +163,12 @@ struct ChoghadiyaTimelineProvider: TimelineProvider {
                     timeZone: DefaultLocation.timeZone,
                     date: now
                 )
-
-                let schedule: ChoghadiyaSchedule
-                if let sunrise = initialFallback.daySlots.first?.startTime, now < sunrise {
-                    var cal = Calendar(identifier: .gregorian)
-                    cal.timeZone = DefaultLocation.timeZone
-                    if let prevDay = cal.date(byAdding: .day, value: -1, to: now) {
-                        schedule = try await manager.getSchedule(
-                            latitude: DefaultLocation.latitude,
-                            longitude: DefaultLocation.longitude,
-                            timeZone: DefaultLocation.timeZone,
-                            date: prevDay
-                        )
-                    } else {
-                        schedule = initialFallback
-                    }
-                } else {
-                    schedule = initialFallback
-                }
-
+                let schedule = try await adjustForPreSunrise(
+                    initialFallback,
+                    latitude: DefaultLocation.latitude,
+                    longitude: DefaultLocation.longitude,
+                    timeZone: DefaultLocation.timeZone
+                )
                 return (
                     schedule,
                     DefaultLocation.cityName,
@@ -207,6 +183,31 @@ struct ChoghadiyaTimelineProvider: TimelineProvider {
                 return (nil, String(localized: "Unavailable"), nil)
             }
         }
+    }
+
+    /// In Vedic astrology, pre-sunrise hours belong to the previous calendar day's cycle.
+    /// Returns the previous day's schedule if the current time is before sunrise.
+    private func adjustForPreSunrise(
+        _ schedule: ChoghadiyaSchedule,
+        latitude: Double,
+        longitude: Double,
+        timeZone: TimeZone
+    ) async throws -> ChoghadiyaSchedule {
+        let now = now()
+        guard let sunrise = schedule.daySlots.first?.startTime, now < sunrise else {
+            return schedule
+        }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        guard let previousDate = calendar.date(byAdding: .day, value: -1, to: now) else {
+            return schedule
+        }
+        return try await manager.getSchedule(
+            latitude: latitude,
+            longitude: longitude,
+            timeZone: timeZone,
+            date: previousDate
+        )
     }
 
     /// Builds a chronological WidgetKit `Timeline` from a calculated `ChoghadiyaSchedule`.

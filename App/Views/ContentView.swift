@@ -63,7 +63,7 @@ struct ContentView: View {
         .onOpenURL { url in
             viewModel.openSchedule(url)
         }
-        .onChange(of: scenePhase) { phase in
+        .onChangeCompat(of: scenePhase) { phase in
             if phase == .active {
                 viewModel.onBecomeActive()
             }
@@ -118,7 +118,7 @@ struct ContentView: View {
             .padding(.top, 8)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("LOCATION")
+                Text(String(localized: "LOCATION"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
 
@@ -150,7 +150,7 @@ struct ContentView: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("DATE")
+                    Text(String(localized: "DATE"))
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -316,6 +316,23 @@ struct ContentView: View {
             Text("\(viewModel.vedicDateString) · All times are local to the selected city.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+    }
+}
+
+// MARK: - Compatibility Helpers
+
+private extension View {
+    /// Backward-compatible wrapper that uses the new two-parameter `onChange` on macOS 14+
+    /// and falls back to the deprecated single-parameter variant on macOS 12–13.
+    @ViewBuilder
+    func onChangeCompat<V: Equatable>(of value: V, perform action: @escaping (V) -> Void) -> some View {
+        if #available(macOS 14.0, *) {
+            onChange(of: value) { _, newValue in
+                action(newValue)
+            }
+        } else {
+            onChange(of: value, perform: action)
         }
     }
 }

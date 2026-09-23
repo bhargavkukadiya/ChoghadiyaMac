@@ -2,6 +2,7 @@ import ChoghadiyaKit
 import SwiftUI
 import WidgetKit
 
+/// Medium-family widget layout pairing the live slot summary with an upcoming-slots sidebar.
 struct MediumWidgetView: View {
     let entry: SimpleEntry
     var body: some View {

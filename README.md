@@ -122,7 +122,6 @@ Designed to feel immediately at home on macOS:
 | <kbd>⌘</kbd> <kbd>L</kbd> | **Select City...** | Opens the global city picker sheet with search and suggestions. |
 | <kbd>⌘</kbd> <kbd>R</kbd> | **Refresh Schedule** | Triggers an immediate refresh of solar calculations and time slots. |
 | <kbd>⌘</kbd> <kbd>T</kbd> | **Jump to Today** | Instantly resets the calendar view to the live current day schedule. |
-| <kbd>⌘</kbd> <kbd>,</kbd> | **Settings / Preferences** | Opens location permissions and app preferences. |
 | <kbd>⌘</kbd> <kbd>W</kbd> | **Close Window** | Standard macOS window management. |
 | <kbd>⌘</kbd> <kbd>Q</kbd> | **Quit Choghadiya** | Terminates the app cleanly. |
 
@@ -176,7 +175,7 @@ graph TD
 
 - **Core Technologies:** SwiftUI, Swift 5.9 / 6.0 Concurrency (`async`/`await`, `@MainActor`, `TaskCancellation`), WidgetKit, Combine, App Group IPC.
 - **External Packages:**
-  - [ChoghadiyaKit](https://github.com/bhargavkukadiya/ChoghadiyaKit) (`v1.0.1`): Deterministic astronomical solar calculator and Panchang schedule builder.
+  - [ChoghadiyaKit](https://github.com/bhargavkukadiya/ChoghadiyaKit) (`v1.0.2`): Deterministic astronomical solar calculator and Panchang schedule builder.
   - [LocationManager](https://github.com/bhargavkukadiya/LocationManager) (`v1.0.1`): Production CoreLocation manager with native async/await, reverse geocoding, and stream safety.
 
 For an exhaustive architectural deep dive, see [ARCHITECTURE.md](ARCHITECTURE.md).

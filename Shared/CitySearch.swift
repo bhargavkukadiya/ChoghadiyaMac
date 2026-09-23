@@ -9,9 +9,13 @@ extension ScheduleLocation: Identifiable {
         "\(latitude),\(longitude),\(timeZone.identifier)"
     }
 
-    private static let ist = TimeZone(identifier: "Asia/Kolkata") ?? TimeZone(secondsFromGMT: 19800)!
-    private static let london = TimeZone(identifier: "Europe/London") ?? TimeZone(secondsFromGMT: 0)!
-    private static let newYork = TimeZone(identifier: "America/New_York") ?? TimeZone(secondsFromGMT: -18000)!
+    private static func timeZone(_ identifier: String, offsetSeconds: Int) -> TimeZone {
+        TimeZone(identifier: identifier) ?? TimeZone(secondsFromGMT: offsetSeconds)!
+    }
+
+    private static let ist = timeZone("Asia/Kolkata", offsetSeconds: 19800)
+    private static let london = timeZone("Europe/London", offsetSeconds: 0)
+    private static let newYork = timeZone("America/New_York", offsetSeconds: -18000)
 
     static let suggestions: [ScheduleLocation] = [
         .init(latitude: 21.1702, longitude: 72.8311, timeZone: ist, cityName: "Surat, India"),

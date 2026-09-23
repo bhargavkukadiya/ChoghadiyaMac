@@ -47,6 +47,10 @@ final class MemoryScheduleStore: ScheduleStoring {
     func save(schedule: ChoghadiyaSchedule, cityName: String, location: ScheduleLocation?) {
         payload = SharedSchedulePayload(schedule: schedule, cityName: cityName, location: location)
     }
+
+    func clear() {
+        payload = nil
+    }
 }
 
 @MainActor

@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bhargavkukadiya/ChoghadiyaKit",
       "state" : {
-        "revision" : "6063310282d8e5752ef0ff41321dd6857908238f",
-        "version" : "1.0.1"
+        "revision" : "92b9e4ddb6f53caf61235190d05f82a7a875a2e6",
+        "version" : "1.0.2"
       }
     },
     {

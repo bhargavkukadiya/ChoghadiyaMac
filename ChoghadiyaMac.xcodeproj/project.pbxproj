@@ -890,7 +890,7 @@
 			repositoryURL = "https://github.com/bhargavkukadiya/ChoghadiyaKit";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.1;
+				minimumVersion = 1.0.2;
 			};
 		};
 		E3A4DB6BB01E2E48F8CF64FE /* XCRemoteSwiftPackageReference "LocationManager" */ = {

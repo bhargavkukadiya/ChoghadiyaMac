@@ -25,7 +25,7 @@ This document provides a comprehensive technical blueprint of **Choghadiya for M
 ## Architectural Principles
 
 1. **Astronomical Fidelity:** Solar timings are non-linear; time divisions are strictly derived from true astronomical local sunrise and sunset calculations rather than fixed clock approximations.
-2. **Strict Concurrency & `@MainActor` Boundaries:** All UI state management is isolated to the main actor, while location, network, and solar calculations execute cooperatively in background asynchronous contexts.
+2. **Concurrency & `@MainActor` Boundaries:** UI state management is isolated to the main actor. Location, network, and solar operations use asynchronous APIs; the app targets currently compile in Swift 5 language mode.
 3. **Race Condition Immunity:** Rapid user interactions (e.g. fast date switching, city changes, permission toggling) cancel obsolete in-flight tasks using cancellation tokens and monotonic request identifiers.
 4. **App Group IPC Resilience:** Synchronization between the host app and the widget extension relies on a dual-layer persistence strategy (`UserDefaults` with App Group suite + fallback JSON file in the shared container).
 5. **Deterministic Testability:** The architecture avoids global singletons and untestable system singletons by injecting time (`TestClock`), location (`LocationManaging`), solar calculations (`SunTimesFetching`), and storage (`ScheduleStore`).
@@ -59,7 +59,7 @@ graph TB
     end
 
     subgraph External Dependencies [Swift Package Manager]
-        CK["ChoghadiyaKit (v1.0.1)<br/>(Astronomical Solar & Panchang Scheduler)"]
+        CK["ChoghadiyaKit (v1.0.2)<br/>(Astronomical Solar & Panchang Scheduler)"]
         LM["LocationManager (v1.0.1)<br/>(Modern CoreLocation Async Wrapper)"]
     end
 
@@ -176,8 +176,8 @@ sequenceDiagram
 - **`SharedScheduleStore`:** Shared persistence engine between the main macOS app and the WidgetKit extension using App Group `group.com.choghadiya.mac`.
 - **Dual-Layer Strategy:**
   1. Primary: `UserDefaults(suiteName: "group.com.choghadiya.mac")` for fast in-memory IPC reads and atomic key-value synchronization.
-  2. Secondary: `schedule_payload.json` written directly to the shared App Group filesystem container as a persistent fallback.
-- **Cache Validation & Expiration:** Rejects expired schedules whose final slot boundary has passed, ensuring expired data is never presented as current.
+  2. Secondary: `shared_schedule.json` written directly to the shared App Group filesystem container as a persistent fallback.
+- **Cache Validation & Expiration:** The store returns decoded payloads without checking expiration. App and widget consumers check that a schedule has a current slot before presenting it as live.
 
 ### 5. WidgetKit Extension Architecture
 - **`ChoghadiyaTimelineProvider`:** Generates `Timeline` entries for widget rendering:
@@ -191,7 +191,7 @@ sequenceDiagram
 
 ## Concurrency & Thread Safety
 
-The codebase is built for **Swift 6 Concurrency** standards:
+The app uses Swift concurrency APIs and actor isolation. Its Xcode targets currently use Swift 5 language mode (`SWIFT_VERSION = 5.0`); this does not enable Swift 6 language-mode checking.
 
 ```
 ┌────────────────────────────────────────────────────────┐

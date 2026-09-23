@@ -121,6 +121,7 @@ final class ContentViewModel: ObservableObject {
         isViewingToday = selectionCalendar.isDate(selectedDate, inSameDayAs: now())
         cityName = city?.cityName ?? String(localized: "Current location")
         persistCity(city)
+        store.clear()
         clearSchedule()
         startLoading()
         reloadWidgets()
@@ -263,6 +264,16 @@ final class ContentViewModel: ObservableObject {
         timeRemainingString = "--:--"
     }
 
+    private func cachedPayloadForLiveRefresh() -> SharedSchedulePayload? {
+        guard let cached = store.load(),
+              cached.schedule.currentSlot(at: now()) != nil,
+              selectedCity == nil || cached.location == selectedCity
+        else {
+            return nil
+        }
+        return cached
+    }
+
     private func startLoading() {
         scheduleTask?.cancel()
         let id = UUID()
@@ -275,11 +286,7 @@ final class ContentViewModel: ObservableObject {
         state = .loading
         statusMessage = nil
 
-        if live,
-           let cached = store.load(),
-           cached.schedule.currentSlot(at: now()) != nil,
-           selectedCity == nil || cached.location == selectedCity
-        {
+        if live, let cached = cachedPayloadForLiveRefresh() {
             apply(cached.schedule, location: cached.location, city: cached.cityName)
             statusMessage = String(localized: "Showing saved timings while refreshing.")
         } else {
@@ -293,30 +300,9 @@ final class ContentViewModel: ObservableObject {
                 }
             }
             do {
-                let result: (ChoghadiyaSchedule, ScheduleLocation)
-                if live {
-                    result = try await loadLiveSchedule()
-                } else {
-                    let location: ScheduleLocation
-                    if let previousLocation {
-                        location = previousLocation
-                    } else if locationManager.isAuthorized {
-                        do {
-                            location = try await resolveLocation()
-                        } catch {
-                            try Task.checkCancellation()
-                            location = fallback
-                        }
-                    } else {
-                        location = fallback
-                    }
-
-                    // Preserve the date selected in the user's calendar in the schedule's timezone.
-                    var calendar = Calendar(identifier: .gregorian)
-                    calendar.timeZone = location.timeZone
-                    let target = calendar.date(from: civilDate) ?? date
-                    result = try await (fetchSchedule(location: location, date: target, live: false), location)
-                }
+                let result = try await live
+                    ? loadLiveSchedule()
+                    : resolveHistoricalSchedule(date: date, civilDate: civilDate, previousLocation: previousLocation)
 
                 try Task.checkCancellation()
                 guard requestID == id else {
@@ -342,14 +328,7 @@ final class ContentViewModel: ObservableObject {
                 guard !Task.isCancelled, requestID == id else {
                     return
                 }
-                retryAfter = now().addingTimeInterval(30)
-                if live, let schedule, schedule.currentSlot(at: now()) != nil {
-                    state = .loaded
-                    statusMessage = String(localized: "Could not refresh. Showing saved timings until this schedule expires.")
-                } else {
-                    clearSchedule()
-                    state = .failed(message: String(localized: "Unable to load timings. Check your internet connection and try again."))
-                }
+                handleScheduleLoadFailure(isLive: live)
             }
         }
     }
@@ -377,6 +356,43 @@ final class ContentViewModel: ObservableObject {
             }
         }
         return try await (fetchSchedule(location: fallback, date: now(), live: true), fallback)
+    }
+
+    private func resolveHistoricalSchedule(
+        date: Date,
+        civilDate: DateComponents,
+        previousLocation: ScheduleLocation?
+    ) async throws -> (ChoghadiyaSchedule, ScheduleLocation) {
+        let location: ScheduleLocation
+        if let previousLocation {
+            location = previousLocation
+        } else if locationManager.isAuthorized {
+            do {
+                location = try await resolveLocation()
+            } catch {
+                try Task.checkCancellation()
+                location = fallback
+            }
+        } else {
+            location = fallback
+        }
+
+        // Preserve the date selected in the user's calendar in the schedule's timezone.
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = location.timeZone
+        let target = calendar.date(from: civilDate) ?? date
+        return try await (fetchSchedule(location: location, date: target, live: false), location)
+    }
+
+    private func handleScheduleLoadFailure(isLive: Bool) {
+        retryAfter = now().addingTimeInterval(30)
+        if isLive, let schedule, schedule.currentSlot(at: now()) != nil {
+            state = .loaded
+            statusMessage = String(localized: "Could not refresh. Showing saved timings until this schedule expires.")
+        } else {
+            clearSchedule()
+            state = .failed(message: String(localized: "Unable to load timings. Check your internet connection and try again."))
+        }
     }
 
     private func resolveLocation() async throws -> ScheduleLocation {

@@ -100,7 +100,7 @@ targets:
 packages:
   ChoghadiyaKit:
     url: https://github.com/bhargavkukadiya/ChoghadiyaKit
-    from: 1.0.1
+    from: 1.0.2
   LocationManager:
     url: https://github.com/bhargavkukadiya/LocationManager.git
     from: 1.0.1

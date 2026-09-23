@@ -11,6 +11,7 @@ public struct ScheduleLocation: Codable, Sendable, Equatable {
 protocol ScheduleStoring {
     func load() -> SharedSchedulePayload?
     func save(schedule: ChoghadiyaSchedule, cityName: String, location: ScheduleLocation?)
+    func clear()
 }
 
 // MARK: - Shared Schedule Payload
